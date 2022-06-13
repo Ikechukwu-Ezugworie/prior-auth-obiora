@@ -1,10 +1,6 @@
 package org.hl7.davinci.priorauth.endpoint;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -69,13 +65,21 @@ public class PatientEndpoint {
   static final String BASE_PROFILE = "http://hl7.org/fhir/us/identity-matching/StructureDefinition/IDI-Patient";
   static final String LEVEL0_PROFILE = "http://hl7.org/fhir/us/identity-matching/StructureDefinition/IDI-Patient-L0";
   static final String LEVEL1_PROFILE = "http://hl7.org/fhir/us/identity-matching/StructureDefinition/IDI-Patient-L1";
+  static final List<String> sortableParams = Arrays.asList("id", "firstname", "lastname");
 
   // JSON output
   @GetMapping(value = { "", "/{id}" }, produces = { MediaType.APPLICATION_JSON_VALUE, "application/fhir+json" })
   public ResponseEntity<String> readPatientJson(HttpServletRequest request,
       @PathVariable(required = false) String id,
-      @RequestParam(name = "identifier", required = false) String patient) {
+      @RequestParam(name = "identifier", required = false) String patient,
+      @RequestParam(name = "sortParam", required = false) String sortParam) {
     Map<String, Object> constraintMap = new HashMap<>();
+    if (sortParam != null) {
+      if (!sortableParams.contains(sortParam)) {
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      }
+    constraintMap.put("sortParam", sortParam);
+    }
     constraintMap.put("id", id);
     constraintMap.put("patient", patient);
     return Endpoint.read(Table.PATIENT, constraintMap, request, RequestType.JSON);
@@ -85,8 +89,18 @@ public class PatientEndpoint {
   @GetMapping(value = { "", "/{id}" }, produces = { MediaType.APPLICATION_XML_VALUE, "application/fhir+xml" })
   public ResponseEntity<String> readPatientXml(HttpServletRequest request,
       @PathVariable(required = false) String id,
-      @RequestParam(name = "identifier", required = false) String patient) {
+      @RequestParam(name = "identifier", required = false) String patient,
+      @RequestParam(name = "sortParam", required = false) String sortParam) {
     Map<String, Object> constraintMap = new HashMap<>();
+    if (sortParam != null) {
+      if (!sortableParams.contains(sortParam)) {
+        String error = "The sortParam parameter must be one of: " + sortableParams.toString();
+        logger.info(error);
+        logger.fine(error);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+      }
+    constraintMap.put("sortParam", sortParam);
+    }
     constraintMap.put("id", id);
     constraintMap.put("patient", patient);
     return Endpoint.read(Table.PATIENT, constraintMap, request, RequestType.XML);

@@ -190,9 +190,10 @@ public class Database {
    * 
    * @param table  - the Table to search in.
    * @param status - the status to search.
+   * @param sortParam - the parameter to sort the result by.
    * @return Bundle - the search result Bundle.
    */
-  public Bundle search(Table table, Map<String, Object> constraintMap) {
+  public Bundle search(Table table, Map<String, Object> constraintMap, String sortParam) {
     logger.info("Database::search(" + table.value() + ", " + constraintMap.toString() + ")");
     AuditEventOutcome auditOutcome = AuditEventOutcome.SUCCESS;
     Bundle results = new Bundle();
@@ -205,6 +206,9 @@ public class Database {
       } else {
         sql = "SELECT id, patient, resource FROM " + table.value() + " WHERE "
           + generateClause(constraintMap, WHERE_CONCAT) + ";";
+      }
+      if (sortParam != null) {
+        sql += " ORDER BY "+sortParam+" ASC;";
       }
       Collection<Map<String, Object>> maps = new HashSet<Map<String, Object>>();
       maps.add(constraintMap);

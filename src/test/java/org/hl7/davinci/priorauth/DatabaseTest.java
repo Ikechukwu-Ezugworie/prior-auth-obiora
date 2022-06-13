@@ -68,7 +68,7 @@ public class DatabaseTest {
 
   @Test
   public void testSearch() {
-    Bundle results = App.getDB().search(Table.BUNDLE, Collections.singletonMap("patient", "pat013"));
+    Bundle results = App.getDB().search(Table.BUNDLE, Collections.singletonMap("patient", "pat013"), "id");
     Assert.assertNotNull(results);
     Assert.assertEquals(BundleType.SEARCHSET, results.getType());
 

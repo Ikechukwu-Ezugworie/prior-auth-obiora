@@ -52,6 +52,10 @@ public class Endpoint {
         logger.info("GET /" + table.value() + ":" + constraintMap.toString() + " fhir+" + requestType.name());
         App.setBaseUrl(Endpoint.getServiceBaseUrl(request));
         String referenceUrl = table.value() + "/" + constraintMap.get("id");
+        String sortParam = null;
+        if (constraintMap.containsKey("sortParam")){
+            sortParam = (String) constraintMap.remove("sortParam");
+        }
         if (!constraintMap.containsKey("patient") && !table.value().equals("Patient")) {
             logger.warning("Endpoint::read:patient null");
             String description = "Attempted to read " + table.value() + " but is unathorized";
@@ -69,7 +73,7 @@ public class Endpoint {
             // Search
             constraintMap.remove("id");
             Bundle searchBundle;
-            searchBundle = App.getDB().search(table, constraintMap);
+            searchBundle = App.getDB().search(table, constraintMap, sortParam);
             formattedData = FhirUtils.getFormattedData(searchBundle, requestType);
             description = "Searched for " + referenceUrl;
         } else {
